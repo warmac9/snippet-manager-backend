@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SnippetManager.Helpers;
 
 namespace SnippetManager.Repository
 {

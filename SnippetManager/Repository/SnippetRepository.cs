@@ -1,7 +1,11 @@
+using System.Dynamic;
+using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using SnippetManager.Database;
+using SnippetManager.Helpers;
 using SnippetManager.Models;
 
 namespace SnippetManager.Repository;
@@ -10,11 +14,21 @@ public class SnippetRepository : ISnippetRepository
 {
     private readonly SnippetManagerContext _context;
     private readonly IMapper _mapper;
+    private readonly AppUser? _curUser;
 
-    public SnippetRepository(SnippetManagerContext context, IMapper mapper)
+    public SnippetRepository(SnippetManagerContext context,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<AppUser> userManager)
     {
         _context = context;
         _mapper = mapper;
+
+        var curUserEmail = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
+        if (curUserEmail != null)
+        {
+            _curUser = userManager.FindByEmailAsync(curUserEmail).Result;
+        }
     }
 
     public async Task<List<SnippetDto>> GetAllAsync()
@@ -27,13 +41,13 @@ public class SnippetRepository : ISnippetRepository
         //}).ToListAsync();
         //return records;
 
-        var records = await _context.Snippet.ToListAsync();
+        var records = await _context.Snippet.Where(x => _curUser.Id == x.UserId).ToListAsync();
         return _mapper.Map<List<SnippetDto>>(records);
     }
 
     public async Task<SnippetDto?> GetByIdAsync(int id)
     {
-        var record = await _context.Snippet.Where(x => x.ID == id).FirstOrDefaultAsync();
+        var record = await _context.Snippet.Where(x => _curUser.Id == x.UserId && x.Id == id).FirstOrDefaultAsync();
         return _mapper.Map<SnippetDto>(record);
     }
 
@@ -41,6 +55,7 @@ public class SnippetRepository : ISnippetRepository
     {
         var snippet = new Snippet()
         {
+            UserId = _curUser.Id,
             Title = model.Title,
             Content = model.Content
         };
@@ -48,12 +63,12 @@ public class SnippetRepository : ISnippetRepository
         _context.Snippet.Add(snippet);
         await _context.SaveChangesAsync();
 
-        return snippet.ID;
+        return snippet.Id;
     }
 
     public async Task<Snippet?> UpdateAsync(int id, SnippetDto model)
     {
-        //unneeccesary two database operations
+        //unnecessary two database operations
         //var snippet = _context.Snippet.FindAsync(snippetId);
         //if (snippet != null) {
         //    snippet.Result.Title = snippetModel.Title;
@@ -65,7 +80,8 @@ public class SnippetRepository : ISnippetRepository
 
         var snippet = new Snippet()
         {
-            ID = id,
+            Id = id,
+            UserId = _curUser.Id,
             Title = model.Title,
             Content = model.Content
         };
@@ -76,6 +92,7 @@ public class SnippetRepository : ISnippetRepository
             await _context.SaveChangesAsync();
             return snippet;
         }
+        //if we update the resource, that already existed, it throws error
         catch (DbUpdateConcurrencyException e)
         {
             return null;
@@ -85,12 +102,14 @@ public class SnippetRepository : ISnippetRepository
     public async Task<Snippet?> PatchAsync(int id, JsonPatchDocument model)
     {
         var snippet = await _context.Snippet.FindAsync(id);
+
         if (snippet != null)
         {
             model.ApplyTo(snippet);
             await _context.SaveChangesAsync();
             return snippet;
         }
+
         return null;
     }
 
@@ -98,7 +117,7 @@ public class SnippetRepository : ISnippetRepository
     {
         var snippet = new Snippet()
         {
-            ID = id
+            Id = id
         };
         _context.Snippet.Remove(snippet);
 
@@ -107,6 +126,7 @@ public class SnippetRepository : ISnippetRepository
             await _context.SaveChangesAsync();
             return snippet;
         }
+        //if we delete the resource, that does not exists, it throws error
         catch (DbUpdateConcurrencyException e)
         {
             return null;

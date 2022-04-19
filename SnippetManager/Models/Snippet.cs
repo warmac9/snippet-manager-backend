@@ -1,8 +1,12 @@
 namespace SnippetManager.Models;
 
-public class Snippet
+public record Snippet
 {
-    public int ID { get; set; }
-    public string Title { get; set; }
-    public string Content { get; set; }
+    public int Id { get; init; }
+
+    public string UserId { get; init; }
+
+    public string Title { get; init; }
+    
+    public string Content { get; init; }
 }

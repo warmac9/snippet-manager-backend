@@ -2,13 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SnippetManager.Models;
 
-public class SnippetDto
+public record SnippetDto
 {
-    public int ID { get; set; }
+    public int Id { get; init; }
 
     [Required]
-    public string Title { get; set; }
+    public string Title { get; init; }
 
     [Required]
-    public string Content { get; set; }
+    public string Content { get; init; }
 }
