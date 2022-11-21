@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
@@ -16,7 +16,9 @@
       "launchUrl": "weatherforecast",
       "applicationUrl": "https://localhost:7137;http://localhost:5137",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://data-gathering-test.vault.azure.net/",
+        "AZURE_USERNAME": "sidlo4@uniba.sk"
       }
     },
     "IIS Express": {
@@ -24,7 +26,9 @@
       "launchBrowser": true,
       "launchUrl": "weatherforecast",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://data-gathering-test.vault.azure.net/",
+        "AZURE_USERNAME": "sidlo4@uniba.sk"
       }
     }
   }
