@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using SnippetManager.Database;
 using SnippetManager.Models;
 using SnippetManager.Repository;
-
+using SnippetManager.Repository.LogEventHub;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +67,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddTransient<ISnippetRepository, SnippetRepository>();
 builder.Services.AddTransient<IAccountRepository, AccountRepository>();
+builder.Services.AddSingleton<ILogEventFactoryRepository, LogEventHubRepository>();
 
 
 var app = builder.Build();
